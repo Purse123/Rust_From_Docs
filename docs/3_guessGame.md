@@ -53,7 +53,7 @@ println!("You guessed: {}", guess);
 - {} work as placeholder
 - When printing the result of evaluating an expression
 - println!("x = {x} and y + 2 = {}", y + 2);
-_____________________________________________________
+***
 > generate random number
 1. include the **rand** crate as a dependency in **Cargo.toml**
 >> - A crate is a collection of Rust source code files. The project we’ve been building is a binary crate, which is executable
@@ -64,5 +64,141 @@ _____________________________________________________
 rand = "0.8.5"
 ```
 >> When include external dependency, Cargo fetches the latest versions of everything, which is a copy of data from Crates.io
-```rust
+***
+# Ensuring Reproducible Builds with the Cargo.lock File
+- it means no matter when or where project is built, the **resulting binary or output will be same**, given the same source code and build environment.
+- when building project, Cargo figures out all versions of dependencies fiting criteria then writes to Cargo.lock file.
+- When build project in future, Cargo will see Cargo.lock file exists, will use the versions specified.
+***
+# Updating a Crate to Get a New Version
+- to update a crate, Cargo provides "update" command , which ignores Cargo.lock file and figure out latest versions specificated in Cargo.toml
+- Cargo then write versions to Cargo.lock file
+```sh
+$ cargo update
+    Updating crates.io index
+    Updating rand v0.8.5 -> v0.8.6
 ```
+- Cargo ignores the 0.9.0 release
+- To use any version in the 0.9.x series, you’d have to update the Cargo.toml file
+```toml
+[dependencies]
+rand = "0.9.0"
+```
+- next time you run cargo build, Cargo will update the registry of crates
+***
+# Generating a Random Number
+- Rng is trait, it defines methods to generate random number generator implement.
+- trait must be in scope to use method.
+```rust
+let secret_number = rand::thread_rng().gen_range(1..=100);
+```
+1. **rand::thread_rng**
+- **rng** = **Random Number Generator**
+- this function provides rng **local** to the **current thread**.
+- this means each **thread gets its own rng**
+- rng of thread_rng is seeded by OS, randomness based on system time, hardware event, etc
+- Alternativly, we can use
+```rust
+let mut rng = rand::thread_rng();
+let random_num = rng.gen_range(1..=100);
+```
+
+2. **gen_range**
+- this method is provided by **Rng** trait
+########################################################
+*As i understand*
+>> major concept of crate, trait, function and method
+>> - rand is crate
+>> - thread_rng is function which implement trait
+>> - rng is trait
+>> - gen_range is method
+
+>> - trait is just like interface in java. for eg, assume two object **Dog** and **Cat**. I want to implement "speak method" it is different to each other but is defined on both.
+```rust
+interface Speakable {
+  void speak();
+}
+class Dog implements Speakable {
+    public void speak() {
+        System.out.println("Woof!");
+    }
+}
+class Cat implements Speakable {
+    public void speak() {
+        System.out.println("Meow!");
+    }
+}
+```
+>> - Rust doesn’t have **classes**, but **structs** and **enums** can implement traits.
+>> #########################################
+>> - gen_range method is defined as part of the Rng trait, which is found in rand crate.
+## more deeper
+1. rand crate is a comprehensive library for random number generation, It provides various tools, traits, and implementations for generating random values
+2. Traits in the rand Crate:
+- rng trait is defined in rand crate. it specify common interface for random number generation
+- other trait eg: RngCore, SeedableRng, etc
+3. rng trait
+- it define varity of method like
+    i. **gen_range**: generate random numbers within specified range. 
+    ii. **gen**: generate random values of different type
+    iii. **fill**: fill buffer with random bytes
+4. Random Number Generator Implementations:
+- **rand crate** includes various concrete random number generator types that implement the Rng trait. common ones are:
+    i. ThreadRng: rng which is local to current thread and seeded by OS.
+    ii. StdRng: it is deterministic and seeded with specific value.
+    iii. SmallRng: smaller but faster rng, useful for certain application.
+
+# Hierarchy
+1. rand crate
+│
+├── Rng trait
+│   ├── gen_range
+│   ├── gen
+│   ├── fill
+│   └── ...
+│
+└── Random Number Generators
+    ├── ThreadRng (implements Rng)
+    ├── StdRng (implements Rng)
+    ├── SmallRng (implements Rng)
+    └── ...
+2. for std
+std (crate)
+│
+├── prelude (module)
+│   ├── Clone (trait)
+│   ├── Copy (trait)
+│   ├── ...
+│
+├── cmp (module)
+│   ├── Ordering (enum)
+│   ├── PartialOrd (trait)
+│   ├── Ord (trait)
+│   └── ...
+│
+├── collections (module)
+│   ├── Vec (type)
+│   ├── HashMap (type)
+│   ├── ...
+│
+├── io (module)
+│   ├── Read (trait)
+│   ├── Write (trait)
+│   └── ...
+└── ...
+
+# Comparing guess and secret number
+1. import the module into the scope
+```rust
+use std::cmp::Ordering;
+```
+- Ordering is enum with variants Less, Greater and Equal
+2. cmp method compare the two value, it takes the reference of the value which we want to compare with.
+```rust
+match guess.cmp(&secret_number) {
+  Ordering::Less => println!("Too small!"),
+  Ordering::Greater => println!("Too big!"),
+  Ordering::Equal => println!("You win!"),
+}
+```
+- here comparing guess and secret_number
