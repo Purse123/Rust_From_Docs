@@ -88,12 +88,27 @@ rand = "0.9.0"
 ***
 # Generating a Random Number
 - Rng is trait, it defines methods to generate random number generator implement.
+```rust
+use rand::Rng;
+```
 - trait must be in scope to use method.
 ```rust
 let secret_number = rand::thread_rng().gen_range(1..=100);
 ```
+***
+## Suppose i am importing like 
+```rust
+use rand::{Rng, thread_rng};
+```
+## I should write
+```rust
+let secret_number = thread_rng().gen_range(1..=100);
+```
+## so it is just like namespace in C++
+***
+
 1. **rand::thread_rng**
-- **rng** = **Random Number Generator**
+*rng = Random Number Generator*
 - this function provides rng **local** to the **current thread**.
 - this means each **thread gets its own rng**
 - rng of thread_rng is seeded by OS, randomness based on system time, hardware event, etc
@@ -192,7 +207,7 @@ std (crate)
 ```rust
 use std::cmp::Ordering;
 ```
-- Ordering is enum with variants Less, Greater and Equal
+- **Ordering is enum** with variants Less, Greater and Equal
 2. cmp method compare the two value, it takes the reference of the value which we want to compare with.
 ```rust
 match guess.cmp(&secret_number) {
@@ -202,3 +217,21 @@ match guess.cmp(&secret_number) {
 }
 ```
 - here comparing guess and secret_number
+
+## There is error due to data type conflict
+```rust
+let guess: u32 = guess.trim().parse().expect("Please type a number!");
+```
+- program already have a variable named guess but also we create a variable of name guess. bcz, rust allows us to shadow the previous value of guess with a new one.
+- **shadowing** allow to reuse the variable rather than forcing to create unique variable.
+
+```rust
+guess.trim().parse()
+```
+- here guess refers to **original variable** i.e. **string**.
+- **trim** method on string eliminate whitespace at the beginning and end.
+>> when value is 5 it store as 5\n. On Windows, its 5\r\n. **trim** eliminate the \n or \r\n. (\r is carriage return)
+- **parse** method converts string to another type.
+>> In this case it is guess: u32 i.e. 32-bit unsigned integer.
+- parse only works on characters that can logically be converted to numbers. that is why we use expect() to handle potential failure
+>> secret_number should also be u32 for comparision.

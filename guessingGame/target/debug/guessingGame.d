@@ -1,1 +1,1 @@
-/home/purseneupane/Desktop/Project/rust/guessingGame/target/debug/guessingGame: /home/purseneupane/Desktop/Project/rust/guessingGame/src/main.rs
+/home/purse/Desktop/project/rust/Rust_From_Docs/guessingGame/target/debug/guessingGame: /home/purse/Desktop/project/rust/Rust_From_Docs/guessingGame/src/main.rs
